@@ -53,9 +53,9 @@ resource "azurerm_linux_function_app" "main" {
     application_stack {
       python_version = "3.11"
     }
-    ftps_state                      = "FtpsOnly"
-    http2_enabled                   = true
-    ip_restriction_default_action   = "Allow"
+    ftps_state                        = "FtpsOnly"
+    http2_enabled                     = true
+    ip_restriction_default_action     = "Allow"
     scm_ip_restriction_default_action = "Allow"
   }
 }
