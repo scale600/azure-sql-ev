@@ -1,0 +1,34 @@
+# Secrets & environment
+.env
+.env.*
+functions/local.settings.json
+*.pem
+*.key
+
+# Python (Azure Functions)
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.python_packages/
+
+# Node (React + Vite frontend)
+node_modules/
+web/dist/
+web/.vite/
+*.log
+
+# Terraform
+*.tfvars
+!*.tfvars.example
+.terraform/
+*.tfstate
+*.tfstate.*
+crash.log
+
+# Local tooling
+.codegraph
+.codegraph/
+.DS_Store
+.idea/
+.vscode/

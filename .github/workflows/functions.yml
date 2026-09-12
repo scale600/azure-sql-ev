@@ -1,0 +1,44 @@
+name: Deploy Azure Functions
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "functions/**"
+      - ".github/workflows/functions.yml"
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy:
+    name: Deploy Function App
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Azure login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Setup Azure Functions Core Tools
+        run: npm install -g azure-functions-core-tools@4 --unsafe-perm true
+
+      - name: Install dependencies
+        working-directory: functions
+        run: python -m pip install -r requirements.txt
+
+      - name: Deploy to Function App
+        working-directory: functions
+        run: func azure functionapp publish func-ev-37851cd1 --python
