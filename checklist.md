@@ -52,14 +52,14 @@
 
 ## Phase 2 — Database Schema & Security
 
-- [ ] `sql/01-create-tables.sql` — `staging` (NVARCHAR) + 4 dimensions + fact
-- [ ] `sql/02-create-indexes.sql` — `IX_*` indexes on dims + fact FKs
-- [ ] `sql/03-etl-dimensions.sql` — load `dim_vehicle`, `dim_location`, `dim_utility`, `dim_model_year`
-- [ ] `sql/04-etl-fact.sql` — load `fact_ev_registration`
-- [ ] `sql/05-sample-queries.sql` — curated examples for the dashboard
-- [ ] `sql/06-readonly-user.sql` — `ev_readonly` + `db_datareader` + `DENY INSERT, UPDATE, DELETE, EXEC`
-- [ ] Apply scripts (Azure Portal Query Editor or `sqlcmd`)
-- [ ] Enable **Allow Azure services** firewall rule on the SQL server
+- [x] `sql/01-create-tables.sql` — `staging` (NVARCHAR) + 4 dimensions + fact
+- [x] `sql/02-create-indexes.sql` — `IX_*` indexes on dims + fact FKs
+- [x] `sql/03-etl-dimensions.sql` — load `dim_vehicle`, `dim_location`, `dim_utility`, `dim_model_year` (runs after Phase 3 ingestion)
+- [x] `sql/04-etl-fact.sql` — load `fact_ev_registration` (runs after Phase 3 ingestion)
+- [x] `sql/05-sample-queries.sql` — curated examples for the dashboard
+- [x] `sql/06-readonly-user.sql` — `ev_readonly` + `db_datareader` + `DENY INSERT, UPDATE, DELETE, EXEC`
+- [x] Apply scripts `01`/`02`/`06` (schema, indexes, read-only user verified: SELECT allowed, INSERT/DROP blocked)
+- [x] Enable **Allow Azure services** firewall rule on the SQL server (via Terraform)
 
 ## Phase 3 — Backend (Azure Functions)
 

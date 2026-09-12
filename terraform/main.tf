@@ -19,6 +19,13 @@ resource "azurerm_mssql_server" "main" {
   }
 }
 
+resource "azurerm_mssql_firewall_rule" "allow_azure_services" {
+  name             = "AllowAllWindowsAzureIps"
+  server_id        = azurerm_mssql_server.main.id
+  start_ip_address = "0.0.0.0"
+  end_ip_address   = "0.0.0.0"
+}
+
 resource "azurerm_storage_account" "main" {
   name                            = "stev37851cd1"
   resource_group_name             = azurerm_resource_group.main.name
