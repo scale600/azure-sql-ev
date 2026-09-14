@@ -20,10 +20,8 @@ export default function QueryHistory({ onLoad }) {
       <ul className="item-list">
         {history.map((h, i) => (
           <li key={i}>
-            <button className="item-btn" onClick={() => onLoad(h.query)}>
-              {h.query.length > 60
-                ? h.query.slice(0, 60) + "…"
-                : h.query}
+            <button className="item-btn" onClick={() => onLoad(h)}>
+              {h.length > 60 ? h.slice(0, 60) + "…" : h}
             </button>
           </li>
         ))}

@@ -53,6 +53,15 @@ resource "azurerm_linux_function_app" "main" {
   storage_account_name       = azurerm_storage_account.main.name
   storage_account_access_key = azurerm_storage_account.main.primary_access_key
 
+  app_settings = {
+    "SQL_SERVER"        = "sql-ev-37851cd1.database.windows.net"
+    "SQL_DB"            = "EVPopulationDB"
+    "SQL_READONLY_USER" = "ev_readonly"
+    "SQL_READONLY_PWD"  = var.sql_readonly_password
+    "SQL_ADMIN_USER"    = var.sql_admin_user
+    "SQL_ADMIN_PWD"     = var.sql_admin_password
+  }
+
   builtin_logging_enabled = false
   client_certificate_mode = "Required"
 

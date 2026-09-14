@@ -30,6 +30,7 @@ crash.log
 .codegraph
 .codegraph/
 .omo/
+.playwright-mcp/
 .DS_Store
 .idea/
 .vscode/

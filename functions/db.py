@@ -1,5 +1,6 @@
 import os
 import re
+import time
 
 import pymssql
 
@@ -24,16 +25,24 @@ _SELECT_RE = re.compile(r"^\s*(SELECT|WITH)\b", re.IGNORECASE)
 def get_connection(readonly=True):
     user = os.environ["SQL_READONLY_USER"] if readonly else os.environ["SQL_ADMIN_USER"]
     password = os.environ["SQL_READONLY_PWD"] if readonly else os.environ["SQL_ADMIN_PWD"]
-    return pymssql.connect(
-        server=os.environ["SQL_SERVER"],
-        user=user,
-        password=password,
-        database=os.environ["SQL_DB"],
-        port=1433,
-        login_timeout=30,
-        timeout=30,
-        charset="utf8",
-    )
+
+    last_exc = None
+    for attempt in range(3):
+        try:
+            return pymssql.connect(
+                server=os.environ["SQL_SERVER"],
+                user=user,
+                password=password,
+                database=os.environ["SQL_DB"],
+                port=1433,
+                login_timeout=60,
+                timeout=30,
+                charset="utf8",
+            )
+        except Exception as exc:
+            last_exc = exc
+            time.sleep(15)
+    raise last_exc
 
 
 def validate_query(query):

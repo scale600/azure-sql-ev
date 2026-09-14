@@ -9,3 +9,9 @@ variable "sql_admin_password" {
   type        = string
   sensitive   = true
 }
+
+variable "sql_readonly_password" {
+  description = "SQL read-only user (ev_readonly) password."
+  type        = string
+  sensitive   = true
+}
