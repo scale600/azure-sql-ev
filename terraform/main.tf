@@ -77,6 +77,7 @@ resource "azurerm_linux_function_app" "main" {
     cors {
       allowed_origins = [
         "https://wonderful-rock-0b2a86a0f.3.azurestaticapps.net",
+        "https://azure-sql-ev.techcloudup.com",
         "http://localhost:5173",
       ]
     }
