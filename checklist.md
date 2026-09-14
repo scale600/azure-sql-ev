@@ -75,15 +75,15 @@
 
 ## Phase 4 — Frontend (React + Vite)
 
-- [ ] Scaffold `web/` (`package.json`, `index.html`, `vite.config.js`, `staticwebapp.config.json`)
-- [ ] `src/api/client.js` — call `/api/query` and `/api/schema`
-- [ ] `src/components/QueryEditor.jsx` — SQL editor + `Ctrl+Enter`
-- [ ] `src/components/ResultTable.jsx` — sortable grid + truncation indicator
-- [ ] `src/components/SavedQueries.jsx` — `localStorage` persistence
-- [ ] `src/components/QueryHistory.jsx` — last 20 executions
-- [ ] `App.jsx` + `main.jsx`
-- [ ] Build: `npm run build` → `web/dist`
-- [ ] Deploy to Static Web App `swa-ev-37851cd1`
+- [x] Scaffold `web/` (`package.json`, `index.html`, `vite.config.js`, `staticwebapp.config.json`)
+- [x] `src/api/client.js` — call `/api/query` and `/api/schema`
+- [x] `src/components/QueryEditor.jsx` — SQL editor + `Ctrl+Enter`
+- [x] `src/components/ResultTable.jsx` — sortable grid + truncation indicator
+- [x] `src/components/SavedQueries.jsx` — `localStorage` persistence
+- [x] `src/components/QueryHistory.jsx` — last 20 executions
+- [x] `App.jsx` + `main.jsx` (schema browser + sample queries)
+- [x] Build: `npm run build` → `web/dist`
+- [x] Deploy to Static Web App `swa-ev-37851cd1` (web.yml workflow; CORS added via Terraform)
 
 ## Phase 5 — Integration
 
