@@ -1,14 +1,30 @@
-import { useRef } from "react";
+import { useMemo, useRef } from "react";
+import CodeMirror from "@uiw/react-codemirror";
+import { sql, MSSQL } from "@codemirror/lang-sql";
+import { keymap } from "@codemirror/view";
 
 export default function QueryEditor({ query, onChange, onRun, loading }) {
-  const ref = useRef(null);
+  const onRunRef = useRef(onRun);
+  onRunRef.current = onRun;
 
-  function handleKeyDown(e) {
-    if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
-      e.preventDefault();
-      onRun();
-    }
-  }
+  const runKeymap = useMemo(
+    () =>
+      keymap.of([
+        {
+          key: "Mod-Enter",
+          run: () => {
+            onRunRef.current();
+            return true;
+          },
+        },
+      ]),
+    []
+  );
+
+  const extensions = useMemo(
+    () => [sql({ dialect: MSSQL, upperCaseKeywords: true }), runKeymap],
+    [runKeymap]
+  );
 
   return (
     <div className="editor">
@@ -18,14 +34,14 @@ export default function QueryEditor({ query, onChange, onRun, loading }) {
           {loading ? "Running…" : "Run"}
         </button>
       </div>
-      <textarea
-        ref={ref}
-        className="editor-textarea"
+      <CodeMirror
         value={query}
-        onChange={(e) => onChange(e.target.value)}
-        onKeyDown={handleKeyDown}
-        spellCheck={false}
-        placeholder={"SELECT ...\n\nPress Ctrl+Enter (or Cmd+Enter) to run."}
+        onChange={onChange}
+        extensions={extensions}
+        theme="dark"
+        height="180px"
+        className="sql-editor"
+        placeholder="SELECT ... (Ctrl/Cmd+Enter to run)"
       />
     </div>
   );

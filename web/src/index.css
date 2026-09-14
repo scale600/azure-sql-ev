@@ -245,18 +245,70 @@ summary:hover {
   cursor: default;
 }
 
-.editor-textarea {
+.sql-editor .cm-editor {
   background: var(--bg);
-  border: none;
   border-top: 1px solid var(--panel-border);
-  color: #d7e3ff;
-  font-family: var(--mono);
   font-size: 14px;
-  line-height: 1.5;
-  padding: 14px;
-  min-height: 160px;
-  resize: vertical;
+}
+
+.sql-editor .cm-editor.cm-focused {
   outline: none;
+}
+
+.sql-editor .cm-scroller {
+  font-family: var(--mono);
+  line-height: 1.6;
+}
+
+.sql-editor .cm-content {
+  padding: 10px 14px;
+  caret-color: var(--accent);
+}
+
+.sql-editor .cm-cursor {
+  border-left-color: var(--accent);
+}
+
+.sql-editor .cm-keyword {
+  color: #c792ea;
+  font-weight: 500;
+}
+
+.sql-editor .cm-string {
+  color: #c3e88d;
+}
+
+.sql-editor .cm-number {
+  color: #f78c6c;
+}
+
+.sql-editor .cm-comment {
+  color: #6a737d;
+  font-style: italic;
+}
+
+.sql-editor .cm-operator {
+  color: #89ddff;
+}
+
+.sql-editor .cm-function {
+  color: #82aaff;
+}
+
+.sql-editor .cm-variableName {
+  color: #d7e3ff;
+}
+
+.sql-editor .cm-typeName {
+  color: #ffcb6b;
+}
+
+.sql-editor .cm-propertyName {
+  color: #d7e3ff;
+}
+
+.sql-editor .cm-placeholder {
+  color: var(--muted);
 }
 
 .error-banner {
