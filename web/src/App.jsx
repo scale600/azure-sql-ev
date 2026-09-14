@@ -4,6 +4,7 @@ import QueryEditor from "./components/QueryEditor.jsx";
 import ResultTable from "./components/ResultTable.jsx";
 import SavedQueries from "./components/SavedQueries.jsx";
 import QueryHistory, { pushHistory } from "./components/QueryHistory.jsx";
+import About from "./components/About.jsx";
 
 const SAMPLE_QUERIES = [
   {
@@ -35,6 +36,7 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const [schema, setSchema] = useState([]);
   const [historyKey, setHistoryKey] = useState(0);
+  const [showAbout, setShowAbout] = useState(false);
 
   useEffect(() => {
     getSchema()
@@ -69,6 +71,9 @@ export default function App() {
       <header className="app-header">
         <h1>azure-sql-ev</h1>
         <span className="subtitle">Washington EV registrations — read-only SQL playground</span>
+        <button className="about-btn" onClick={() => setShowAbout(true)}>
+          About
+        </button>
       </header>
 
       <div className="layout">
@@ -125,6 +130,8 @@ export default function App() {
           {!error && <ResultTable result={result} />}
         </main>
       </div>
+
+      {showAbout && <About onClose={() => setShowAbout(false)} />}
     </div>
   );
 }
