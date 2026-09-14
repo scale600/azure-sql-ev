@@ -3,7 +3,7 @@
 > An interactive **SQL query test dashboard** built on Azure SQL Database, Azure Functions, and Azure Static Web Apps — powered by real-world Washington State EV registration data.
 
 **Live**: https://azure-sql-ev.techcloudup.com
-**Repo**: https://github.com/<username>/azure-sql-ev
+**Repo**: https://github.com/scale600/azure-sql-ev
 
 ---
 
@@ -140,7 +140,7 @@ azure-sql-ev/
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/<username>/azure-sql-ev.git
+git clone https://github.com/scale600/azure-sql-ev.git
 cd azure-sql-ev
 ```
 
@@ -209,7 +209,7 @@ func azure functionapp publish <your-function-app-name>
 az staticwebapp create \
   --name azure-sql-ev-web \
   --resource-group rg-azure-sql-ev \
-  --source https://github.com/<username>/azure-sql-ev \
+  --source https://github.com/scale600/azure-sql-ev \
   --location "eastasia" \
   --branch main \
   --app-location "web" \

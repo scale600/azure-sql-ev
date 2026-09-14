@@ -95,9 +95,9 @@
 
 ## Phase 6 — Custom Domain & SSL
 
-- [ ] Add CNAME `azure-sql-ev` → `wonderful-rock-0b2a86a0f.3.azurestaticapps.net`
-- [ ] Add custom domain in the SWA portal
-- [ ] Verify SSL auto-provisioned (within 24 h)
+- [x] Add CNAME `azure-sql-ev` → `wonderful-rock-0b2a86a0f.3.azurestaticapps.net` (Cloudflare, DNS only)
+- [x] Add custom domain via `az staticwebapp hostname set` (status: Ready)
+- [x] Verify SSL auto-provisioned (DigiCert/GeoTrust cert, valid)
 
 ## Phase 7 — QA, Documentation, Release
 

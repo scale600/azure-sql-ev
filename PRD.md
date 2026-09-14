@@ -4,7 +4,7 @@
 
 **Project**: azure-sql-ev
 **Domain**: https://azure-sql-ev.techcloudup.com
-**Repository**: https://github.com/<username>/azure-sql-ev
+**Repository**: https://github.com/scale600/azure-sql-ev
 **Version**: 1.0
 **Status**: Draft
 **Last Updated**: 2026-09-11
