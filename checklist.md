@@ -101,11 +101,11 @@
 
 ## Phase 7 — QA, Documentation, Release
 
-- [ ] Verify `$0` monthly cost (Azure Cost Management)
-- [ ] Capture screenshots (`docs/screenshots/dashboard-overview.png`, `query-result.png`)
-- [ ] Write `docs/architecture.md`, `docs/erd.md`, `docs/dns-setup.md`
-- [ ] Commit + push to GitHub
-- [ ] Replace `<username>` placeholder in `README.md` and `PRD.md` repo URLs
+- [x] Verify `$0` monthly cost (SQL free offer `useFreeLimit:true`, SWA `Free`, Functions consumption)
+- [x] Capture screenshots (`docs/screenshots/dashboard-overview.png`, `query-result.png`)
+- [x] Write `docs/architecture.md`, `docs/erd.md`, `docs/dns-setup.md`
+- [x] Commit + push to GitHub
+- [x] Replace `<username>` placeholder in `README.md` and `PRD.md` repo URLs
 
 ---
 
