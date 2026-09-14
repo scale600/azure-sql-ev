@@ -87,9 +87,11 @@
 
 ## Phase 5 — Integration
 
-- [ ] Wire SWA `/api/*` → Function App (or point `api/client.js` at `FUNCTION_APP_URL`)
-- [ ] CORS restricted to the SWA domain
-- [ ] End-to-end test: run a sample query in the browser
+- [x] Wire SWA → Function App (`api/client.js` points at `FUNCTION_APP_URL` directly)
+- [x] CORS restricted to the SWA domain (Terraform `site_config.cors`)
+- [x] End-to-end test: run a sample query in the browser (results render, sorting works, history persists)
+- [x] Function App `app_settings` managed in Terraform (were wiped by an earlier apply)
+- [x] `db.py` connection retry + `login_timeout` 60s for serverless auto-pause resume
 
 ## Phase 6 — Custom Domain & SSL
 
