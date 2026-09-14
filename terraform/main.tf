@@ -64,6 +64,13 @@ resource "azurerm_linux_function_app" "main" {
     http2_enabled                     = true
     ip_restriction_default_action     = "Allow"
     scm_ip_restriction_default_action = "Allow"
+
+    cors {
+      allowed_origins = [
+        "https://wonderful-rock-0b2a86a0f.3.azurestaticapps.net",
+        "http://localhost:5173",
+      ]
+    }
   }
 }
 

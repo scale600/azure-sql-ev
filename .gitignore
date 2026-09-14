@@ -29,6 +29,7 @@ crash.log
 # Local tooling
 .codegraph
 .codegraph/
+.omo/
 .DS_Store
 .idea/
 .vscode/
