@@ -482,3 +482,19 @@ tbody tr:hover {
 .about-links a:hover {
   text-decoration: underline;
 }
+
+.about-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  background: var(--bg);
+  border: 1px solid var(--panel-border);
+  border-radius: 999px;
+  padding: 4px 12px;
+  font-size: 12px;
+  font-family: var(--mono);
+  color: var(--text);
+}
