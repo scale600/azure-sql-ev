@@ -28,7 +28,6 @@ CREATE TABLE dbo.staging (
     ev_type              NVARCHAR(50)  NULL,
     cafv_eligibility     NVARCHAR(100) NULL,
     electric_range       NVARCHAR(10)  NULL,
-    base_msrp            NVARCHAR(20)  NULL,
     legislative_district NVARCHAR(10)  NULL,
     dol_vehicle_id       NVARCHAR(50)  NULL,
     electric_utility     NVARCHAR(200) NULL,
@@ -56,8 +55,7 @@ CREATE TABLE dbo.dim_location (
     county       NVARCHAR(50) NULL,
     city         NVARCHAR(50) NULL,
     state        NVARCHAR(2)  NULL,
-    postal_code  NVARCHAR(10) NULL,
-    census_tract NVARCHAR(50) NULL
+    postal_code  NVARCHAR(10) NULL
 );
 
 -- ------------------------------------------------------------
@@ -86,7 +84,6 @@ CREATE TABLE dbo.fact_ev_registration (
     utility_key          INT           NOT NULL,
     model_year_key       INT           NOT NULL,
     electric_range       INT           NULL,
-    base_msrp            INT           NULL,
     legislative_district INT           NULL,
     dol_vehicle_id       NVARCHAR(50)  NULL,
     CONSTRAINT FK_fact_vehicle    FOREIGN KEY (vehicle_key)    REFERENCES dbo.dim_vehicle (vehicle_key),

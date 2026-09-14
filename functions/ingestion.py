@@ -14,18 +14,17 @@ SOURCE_TO_COLUMN = {
     "county": "county",
     "city": "city",
     "state": "state",
-    "postal_code": "postal_code",
+    "zip_code": "postal_code",
     "model_year": "model_year",
     "make": "make",
     "model": "model",
-    "electric_vehicle_type": "ev_type",
-    "cafv_eligibility": "cafv_eligibility",
+    "ev_type": "ev_type",
+    "cafv_type": "cafv_eligibility",
     "electric_range": "electric_range",
-    "base_msrp": "base_msrp",
     "legislative_district": "legislative_district",
     "dol_vehicle_id": "dol_vehicle_id",
     "electric_utility": "electric_utility",
-    "census_tract": "census_tract",
+    "_2020_census_tract": "census_tract",
 }
 
 STAGING_COLUMNS = list(SOURCE_TO_COLUMN.values())
@@ -76,26 +75,27 @@ def _etl(conn):
         "SELECT DISTINCT ISNULL(electric_utility, N'Unknown') FROM dbo.staging"
     )
     cursor.execute(
-        "INSERT INTO dbo.dim_location (county, city, state, postal_code, census_tract) "
-        "SELECT DISTINCT county, city, state, postal_code, census_tract FROM dbo.staging"
+        "INSERT INTO dbo.dim_location (county, city, state, postal_code) "
+        "SELECT DISTINCT ISNULL(county, N''), ISNULL(city, N''), ISNULL(state, N''), ISNULL(postal_code, N'') "
+        "FROM dbo.staging"
     )
     cursor.execute(
         "INSERT INTO dbo.dim_vehicle (vin_1_10, make, model, model_year, ev_type, cafv_eligibility) "
         "SELECT DISTINCT vin_1_10, make, model, TRY_CAST(model_year AS SMALLINT), ev_type, cafv_eligibility "
-        "FROM dbo.staging"
+        "FROM dbo.staging WHERE vin_1_10 IS NOT NULL"
     )
     cursor.execute(
         "INSERT INTO dbo.fact_ev_registration "
-        "(vehicle_key, location_key, utility_key, model_year_key, electric_range, base_msrp, legislative_district, dol_vehicle_id) "
+        "(vehicle_key, location_key, utility_key, model_year_key, electric_range, legislative_district, dol_vehicle_id) "
         "SELECT v.vehicle_key, l.location_key, u.utility_key, y.model_year_key, "
-        "TRY_CAST(s.electric_range AS INT), TRY_CAST(s.base_msrp AS INT), "
+        "TRY_CAST(s.electric_range AS INT), "
         "TRY_CAST(s.legislative_district AS INT), s.dol_vehicle_id "
         "FROM dbo.staging s "
         "JOIN dbo.dim_vehicle v ON s.vin_1_10 = v.vin_1_10 "
-        "JOIN dbo.dim_location l ON ISNULL(s.county, N'') = ISNULL(l.county, N'') "
-        "AND ISNULL(s.city, N'') = ISNULL(l.city, N'') "
-        "AND ISNULL(s.state, N'') = ISNULL(l.state, N'') "
-        "AND ISNULL(s.postal_code, N'') = ISNULL(l.postal_code, N'') "
+        "JOIN dbo.dim_location l ON ISNULL(s.county, N'') = l.county "
+        "AND ISNULL(s.city, N'') = l.city "
+        "AND ISNULL(s.state, N'') = l.state "
+        "AND ISNULL(s.postal_code, N'') = l.postal_code "
         "JOIN dbo.dim_model_year y ON TRY_CAST(s.model_year AS SMALLINT) = y.model_year "
         "JOIN dbo.dim_utility u ON ISNULL(s.electric_utility, N'Unknown') = u.electric_utility"
     )

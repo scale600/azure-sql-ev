@@ -22,9 +22,13 @@ INSERT INTO dbo.dim_utility (electric_utility)
 SELECT DISTINCT ISNULL(electric_utility, N'Unknown')
 FROM dbo.staging;
 
--- dim_location (distinct county/city/state/postal/census combinations).
-INSERT INTO dbo.dim_location (county, city, state, postal_code, census_tract)
-SELECT DISTINCT county, city, state, postal_code, census_tract
+-- dim_location (distinct county/city/state/postal; NULLs coalesced to '').
+INSERT INTO dbo.dim_location (county, city, state, postal_code)
+SELECT DISTINCT
+    ISNULL(county, N''),
+    ISNULL(city, N''),
+    ISNULL(state, N''),
+    ISNULL(postal_code, N'')
 FROM dbo.staging;
 
 -- dim_vehicle (unique by VIN prefix; TRY_CAST hardens malformed years).
@@ -36,4 +40,5 @@ SELECT DISTINCT
     TRY_CAST(model_year AS SMALLINT),
     ev_type,
     cafv_eligibility
-FROM dbo.staging;
+FROM dbo.staging
+WHERE vin_1_10 IS NOT NULL;

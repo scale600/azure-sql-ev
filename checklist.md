@@ -63,14 +63,15 @@
 
 ## Phase 3 — Backend (Azure Functions)
 
-- [ ] Scaffold `functions/` (`host.json`, `requirements.txt`, `local.settings.json.example`)
-- [ ] `EvIngestion/` — TimerTrigger (daily 06:00 UTC): fetch Socrata API → upsert `staging`
-- [ ] `SqlQueryApi/` — `POST /api/query` and `GET /api/schema`
-- [ ] Query guard: `SELECT`/`WITH` allowlist, DDL/DML keyword blocklist, 30 s timeout, 1,000-row cap
-- [ ] Use `ev_readonly` (least privilege), not the admin user, for the query API
-- [ ] Deploy: `func azure functionapp publish func-ev-37851cd1`
-- [ ] Set secrets in Function App Settings (not in code)
-- [ ] Smoke-test `POST /api/query` with a sample `SELECT`
+- [x] Scaffold `functions/` (`host.json`, `requirements.txt`, `local.settings.json.example`)
+- [x] `EvIngestion` — TimerTrigger (daily 06:00 UTC): fetch Socrata API → `staging` → ETL (dims + fact)
+- [x] `SqlQueryApi` — `POST /api/query` and `GET /api/schema` (V2 programming model, single `function_app.py`)
+- [x] Query guard: `SELECT`/`WITH` allowlist, DDL/DML keyword blocklist, 30 s timeout, 1,000-row cap
+- [x] Use `ev_readonly` (least privilege) for the query API; `evadmin` only for ingestion
+- [x] Deploy: `func azure functionapp publish func-ev-37851cd1` (uses `pymssql` — no ODBC driver on Linux)
+- [x] Set secrets in Function App Settings (not in code)
+- [x] Smoke-test `POST /api/query` (SELECT → 200, INSERT/DROP/DELETE → 403)
+- [x] Ingestion verified: 294,193 records loaded (staging = fact, no duplicates) with a sample `SELECT`
 
 ## Phase 4 — Frontend (React + Vite)
 
