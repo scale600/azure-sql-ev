@@ -36,7 +36,7 @@ const KPI_QUERY = [
   "(SELECT COUNT(*) FROM fact_ev_registration) AS total_registrations,",
   "(SELECT COUNT(*) FROM fact_ev_registration f JOIN dim_vehicle v ON f.vehicle_key = v.vehicle_key WHERE v.ev_type LIKE '%BEV%') AS bev_count,",
   "(SELECT COUNT(*) FROM fact_ev_registration f JOIN dim_vehicle v ON f.vehicle_key = v.vehicle_key WHERE v.ev_type LIKE '%PHEV%') AS phev_count,",
-  "(SELECT ROUND(AVG(CAST(electric_range AS FLOAT)), 0) FROM fact_ev_registration WHERE electric_range IS NOT NULL) AS avg_range",
+  "(SELECT ROUND(AVG(CAST(electric_range AS FLOAT)), 0) FROM fact_ev_registration WHERE electric_range > 0) AS avg_range",
 ].join(" ");
 
 export default function App() {
