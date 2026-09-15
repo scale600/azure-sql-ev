@@ -313,7 +313,7 @@ summary:hover {
 
 table {
   border-collapse: collapse;
-  width: 100%;
+  width: auto;
   font-size: 13px;
 }
 
