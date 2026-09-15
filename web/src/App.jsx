@@ -68,7 +68,7 @@ export default function App() {
     try {
       const data = await runQuery(query);
       setResult(data);
-      setView("table");
+      setView(isChartable(data) ? "chart" : "table");
       pushHistory(query.trim());
       setHistoryKey((k) => k + 1);
     } catch (e) {
