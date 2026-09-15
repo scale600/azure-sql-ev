@@ -7,6 +7,7 @@ import KpiCards from "./components/KpiCards.jsx";
 import SavedQueries from "./components/SavedQueries.jsx";
 import QueryHistory, { pushHistory } from "./components/QueryHistory.jsx";
 import About from "./components/About.jsx";
+import Dba from "./components/Dba.jsx";
 
 const SAMPLE_QUERIES = [
   {
@@ -47,6 +48,7 @@ export default function App() {
   const [schema, setSchema] = useState([]);
   const [historyKey, setHistoryKey] = useState(0);
   const [showAbout, setShowAbout] = useState(false);
+  const [showDba, setShowDba] = useState(false);
   const [kpi, setKpi] = useState(null);
   const [view, setView] = useState("table");
 
@@ -87,9 +89,14 @@ export default function App() {
       <header className="app-header">
         <h1>azure-sql-ev</h1>
         <span className="subtitle">Washington EV registrations — read-only SQL playground</span>
-        <button className="about-btn" onClick={() => setShowAbout(true)}>
-          About
-        </button>
+        <div className="header-actions">
+          <button className="about-btn" onClick={() => setShowDba(true)}>
+            DBA
+          </button>
+          <button className="about-btn" onClick={() => setShowAbout(true)}>
+            About
+          </button>
+        </div>
       </header>
 
       {kpi && <KpiCards kpi={kpi} />}
@@ -174,6 +181,7 @@ export default function App() {
       </div>
 
       {showAbout && <About onClose={() => setShowAbout(false)} />}
+      {showDba && <Dba onClose={() => setShowDba(false)} />}
     </div>
   );
 }
