@@ -1,16 +1,16 @@
 const SECTIONS = [
   {
-    title: "1. 인프라 & DB 구축",
+    title: "1. Infrastructure & Provisioning",
     lead:
-      "Azure SQL Database 무료 오퍼(serverless)에 스타 스키마를 구축했다. 무료 오퍼의 use_free_limit 플래그는 azurerm 프로바이더가 노출하지 않으므로 azapi_resource로 프로비저닝한다.",
+      "A star schema is built on the Azure SQL Database free offer (serverless). The offer's use_free_limit flag is not exposed by the azurerm provider, so it is provisioned via azapi_resource.",
     rows: [
       ["SQL Server", "sql-ev-37851cd1.database.windows.net — West US 3"],
       ["Database", "EVPopulationDB — serverless · General Purpose · auto-pause"],
-      ["Compute", "100,000 vCore-s/월 무료 (현재 사용률 ~3%)"],
-      ["Storage", "32 GB 무료 (데이터 + 로그 + 백업 포함)"],
-      ["방화벽", "AllowAllWindowsAzureIps + 개발 클라이언트 IP 2건"],
+      ["Compute", "100,000 vCore-s/month free (currently ~3% usage)"],
+      ["Storage", "32 GB free (data + log + backup)"],
+      ["Firewall", "AllowAllWindowsAzureIps + 2 dev client IPs"],
     ],
-    code: `# free offer는 azurerm이 아닌 azapi_resource로만 제어 가능
+    code: `# free offer is only controllable via azapi_resource, not azurerm
 resource "azapi_resource" "sql_db" {
   type = "Microsoft.Sql/servers/databases@2025-02-01-preview"
   name = "EVPopulationDB"
@@ -28,19 +28,19 @@ resource "azapi_resource" "sql_db" {
 }`,
   },
   {
-    title: "2. 스키마 설계 (스타 스키마)",
+    title: "2. Schema Design (Star Schema)",
     lead:
-      "원시 Socrata 레코드는 전부 NVARCHAR로 staging에 적재해 TRY_CAST 실패를 격리하고, 이후 차원·팩트 테이블에 정형화한다. 차원 키는 IDENTITY 대리 키 + 자연 키 조인으로 구성한다.",
+      "Raw Socrata records are loaded into staging entirely as NVARCHAR to isolate TRY_CAST failures, then normalized into dimension and fact tables. Dimension keys use IDENTITY surrogate keys joined via natural keys.",
     rows: [
-      ["staging", "294,193행 — 원시 컬럼 전부 NVARCHAR (TRY_CAST 안전망)"],
-      ["dim_vehicle", "18,068행 — make / model / ev_type / cafv_eligibility"],
-      ["dim_location", "1,520행 — county / city / state / postal_code"],
-      ["dim_utility", "78행 — 전력 유틸리티 회사"],
-      ["dim_model_year", "23행 — 연식 (model_year)"],
-      ["fact_ev_registration", "294,193행 — 등록 1건당 1행 + 4개 외래 키"],
+      ["staging", "294,193 rows — raw columns all NVARCHAR (TRY_CAST safety net)"],
+      ["dim_vehicle", "18,068 rows — make / model / ev_type / cafv_eligibility"],
+      ["dim_location", "1,520 rows — county / city / state / postal_code"],
+      ["dim_utility", "78 rows — electric utility companies"],
+      ["dim_model_year", "23 rows — model years"],
+      ["fact_ev_registration", "294,193 rows — one row per registration + 4 foreign keys"],
     ],
     note:
-      "census_tract는 dim_location에서 의도적으로 제외했다. 팩트 조인 시 census_tract가 중복 매칭되어 팩트 행이 증폭되는 문제를 방지하기 위함이다.",
+      "census_tract is deliberately excluded from dim_location — it caused duplicate matches during fact joins and inflated the fact row count.",
     code: `CREATE TABLE dbo.fact_ev_registration (
   registration_key BIGINT IDENTITY(1,1) PRIMARY KEY,
   vehicle_key     INT  NOT NULL REFERENCES dim_vehicle(vehicle_key),
@@ -53,14 +53,14 @@ resource "azapi_resource" "sql_db" {
 );`,
   },
   {
-    title: "3. 인덱스 & 성능",
+    title: "3. Indexes & Performance",
     lead:
-      "294K행 규모는 인덱스 없이도 수 초 내 처리되지만, 분석 쿼리(차원 조인)의 데모 목적으로 외래 키 인덱스와 커버링 인덱스를 구성했다.",
+      "At 294K rows the workload completes in seconds even without indexes, but foreign-key and covering indexes were added to demonstrate analytical (dimension-join) query tuning.",
     rows: [
-      ["클러스터드 PK", "모든 테이블에 IDENTITY 대리 키 클러스터드 인덱스"],
-      ["FK 인덱스", "fact의 4개 외래 키 컬럼에 비클러스터드 인덱스"],
-      ["커버링 인덱스", "dim_vehicle(make, ev_type) INCLUDE (model)"],
-      ["실측", "Top 10 make 쿼리 ~150ms (콜드)/ ~40ms (웜)"],
+      ["Clustered PK", "IDENTITY surrogate-key clustered index on every table"],
+      ["FK indexes", "Nonclustered indexes on fact's 4 foreign-key columns"],
+      ["Covering index", "dim_vehicle(make, ev_type) INCLUDE (model)"],
+      ["Measured", "Top 10 make query ~150ms (cold) / ~40ms (warm)"],
     ],
     code: `CREATE INDEX IX_fact_vehicle  ON fact_ev_registration(vehicle_key);
 CREATE INDEX IX_fact_location ON fact_ev_registration(location_key);
@@ -69,39 +69,39 @@ CREATE INDEX IX_fact_year     ON fact_ev_registration(model_year_key);
 CREATE INDEX IX_vehicle_make  ON dim_vehicle(make, ev_type) INCLUDE (model);`,
   },
   {
-    title: "4. 보안 (최소 권한)",
+    title: "4. Security (Least Privilege)",
     lead:
-      "계정을 용도별로 분리했다. ingestion은 쓰기 권한이 있는 evadmin, 쿼리 API는 읽기 전용 ev_readonly를 사용한다. 로그인은 반드시 master에서 생성해야 한다.",
+      "Accounts are separated by role: ingestion uses evadmin (write), the query API uses read-only ev_readonly. Logins must be created in master.",
     rows: [
-      ["evadmin", "db_owner — ingestion/ETL 전용 (클라이언트에 노출 안 됨)"],
+      ["evadmin", "db_owner — ingestion/ETL only (never exposed to clients)"],
       ["ev_readonly", "db_datareader + DENY INSERT/UPDATE/DELETE/EXEC"],
-      ["쿼리 가드", "SELECT/WITH allowlist + DDL/DML 키워드 blocklist"],
-      ["연결", "Encrypt=yes · 30s timeout · 1,000행 응답 상한"],
+      ["Query guard", "SELECT/WITH allowlist + DDL/DML keyword blocklist"],
+      ["Connection", "Encrypt=yes · 30s timeout · 1,000-row response cap"],
     ],
     note:
-      "CREATE LOGIN을 사용자 DB에서 실행하면 40515(master.sys.sql_logins 크로스-DB 참조 불가)·5001(CREATE LOGIN은 master에서)이 발생한다. 반드시 master 컨텍스트에서 LOGIN을 만든 뒤 사용자 DB에서 USER를 매핑한다.",
-    code: `-- master 컨텍스트
+      "Running CREATE LOGIN in a user database raises 40515 (cannot reference master.sys.sql_logins cross-DB) or 5001 (CREATE LOGIN must be in master). Always create the LOGIN in the master context, then map a USER in the user database.",
+    code: `-- master context
 CREATE LOGIN ev_readonly
   WITH PASSWORD = '<strong-password>', CHECK_POLICY = ON;
 
--- 사용자 DB 컨텍스트
+-- user database context
 CREATE USER ev_readonly FOR LOGIN ev_readonly;
 ALTER ROLE db_datareader ADD MEMBER ev_readonly;
 DENY INSERT, UPDATE, DELETE, EXEC TO ev_readonly;`,
   },
   {
-    title: "5. 데이터 적재 & ETL",
+    title: "5. Data Ingestion & ETL",
     lead:
-      "Socrata SODA API에서 $limit/$offset 페이지네이션으로 전체를 읽어 staging에 대량 적재하고, 자연 키 조인으로 차원을 채운 뒤 팩트를 생성한다.",
+      "The full dataset is read from the Socrata SODA API using $limit/$offset pagination, bulk-loaded into staging, then dimensions are populated via natural-key joins before the fact table is built.",
     rows: [
-      ["소스", "data.wa.gov Electric Vehicle Population Data (Socrata)"],
-      ["페이지네이션", "$limit=$offset (SODA API 표준)"],
-      ["필드 매핑", "zip_code→postal_code · cafv_type→cafv_eligibility · _2020_census_tract→census_tract"],
-      ["측정", "fetch ~40s + insert ~49s + ETL ~43s ≈ 132s"],
-      ["무결성", "staging 행 수 == fact 행 수 (294,193, 중복 없음)"],
+      ["Source", "data.wa.gov Electric Vehicle Population Data (Socrata)"],
+      ["Pagination", "$limit/$offset (SODA API standard)"],
+      ["Field mapping", "zip_code→postal_code · cafv_type→cafv_eligibility · _2020_census_tract→census_tract"],
+      ["Measured", "fetch ~40s + insert ~49s + ETL ~43s ≈ 132s"],
+      ["Integrity", "staging rows == fact rows (294,193, no duplicates)"],
     ],
     note:
-      "데이터셋에는 base_msrp 컬럼이 없다. 원본 스키마와 다른 필드명(zip_code→postal_code 등)이 실제 SODA 응답과 일치하도록 매핑을 보정했다.",
+      "The dataset has no base_msrp column. Field names that differ from the source schema (zip_code→postal_code, etc.) were remapped to match the actual SODA response.",
     code: `INSERT INTO dim_vehicle (vin_prefix, make, model, model_year, ev_type, cafv_eligibility)
 SELECT DISTINCT
   LEFT(VIN, 10), make, model,
@@ -111,16 +111,16 @@ FROM staging
 WHERE VIN IS NOT NULL;`,
   },
   {
-    title: "6. 운용 (Operations)",
+    title: "6. Operations",
     lead:
-      "무료 오퍼는 유휴 시 DB가 자동 일시중지(auto-pause)되어 재개에 30~60초가 걸린다. 애플리케이션 레이어에서 이를 흡수한다.",
+      "The free offer auto-pauses the database when idle; resuming takes 30–60s. The application layer absorbs this.",
     rows: [
-      ["auto-pause", "유휴 시 자동 일시중지 → 첫 쿼리에서 40613 반환"],
-      ["재연결", "3회 재시도 · 15s 간격 · login_timeout=60"],
-      ["모니터링", "vCore-s/스토리지 사용량은 포털에서 무료 한도 대비 확인"],
-      ["백업", "free offer의 32GB 내 자동 백업(7일) 포함"],
+      ["auto-pause", "Pauses when idle → first query returns 40613"],
+      ["Reconnect", "3 retries · 15s interval · login_timeout=60"],
+      ["Monitoring", "vCore-s/storage usage vs free limit in the portal"],
+      ["Backup", "7-day automated backups within the 32 GB free storage"],
     ],
-    code: `# db.py — 일시중지 재개를 흡수하는 연결 재시도
+    code: `# db.py — connection retry that absorbs auto-pause resume
 def get_connection(readonly=True):
     for attempt in range(3):
         try:
@@ -129,31 +129,31 @@ def get_connection(readonly=True):
                 database=SQL_DB, login_timeout=60, timeout=30)
         except pymssql.OperationalError as e:
             if "not currently available" in str(e) and attempt < 2:
-                time.sleep(15)   # 40613: auto-pause 재개 대기
+                time.sleep(15)   # 40613: waiting for auto-pause resume
                 continue
             raise`,
   },
   {
-    title: "7. IaC & 배포 (Terraform + CI/CD)",
+    title: "7. IaC & Deployment (Terraform + CI/CD)",
     lead:
-      "전 리소스를 Terraform으로 관리하고, GitHub Actions(OIDC, 시크릿 없음)로 배포한다. 함수 앱의 app_settings는 반드시 Terraform에서 관리해야 한다.",
+      "All resources are managed with Terraform and deployed via GitHub Actions (OIDC, no secrets). Function-app app_settings must be managed in Terraform.",
     rows: [
-      ["원격 상태", "Azure Storage (stev37851cd1/tfstate)"],
-      ["OIDC", "GitHub App(0a875070) 연동 — 서비스 주체 시크릿 없음"],
-      ["app_settings", "SQL_* 접속 정보는 TF에 정의 (az CLI 설정값은 apply 시 유실됨)"],
-      ["CORS", "커스텀 도메인 + 로컬호스트만 허용"],
+      ["Remote state", "Azure Storage (stev37851cd1/tfstate)"],
+      ["OIDC", "GitHub App (0a875070) — no service-principal secret"],
+      ["app_settings", "SQL_* connection info defined in TF (az CLI values are lost on apply)"],
+      ["CORS", "Custom domain + localhost only"],
     ],
     note:
-      "az CLI로 함수 앱 app_settings를 설정해도, 이후 Terraform apply가 함수 앱을 관리하면 설정이 초기화된다. 반드시 terraform/main.tf의 app_settings 블록에 SQL 접속 정보를 포함시켰다.",
+      "Setting function-app app_settings via the az CLI is wiped when Terraform manages the function app. SQL connection info is therefore defined in the app_settings block of terraform/main.tf.",
   },
   {
-    title: "8. 장애 대응 (에러 코드별)",
+    title: "8. Troubleshooting (by error code)",
     rows: [
-      ["40613", "DB가 auto-pause 재개 중 → 재시도(15s)로 흡수"],
-      ["40515", "master.sys.sql_logins 크로스-DB 참조 불가 → LOGIN은 master에서"],
-      ["5001", "CREATE LOGIN 위치 오류 → master 컨텍스트로 이동"],
-      ["Login timeout", "pymssql은 login_timeout 키워드 (Connection Timeout 아님)"],
-      ["방화벽 차단", "Azure 서비스 허용 + 개발 IP를 방화벽 규칙에 추가"],
+      ["40613", "DB resuming from auto-pause → absorbed by retry (15s)"],
+      ["40515", "Cannot reference master.sys.sql_logins cross-DB → create LOGIN in master"],
+      ["5001", "CREATE LOGIN location error → move to master context"],
+      ["Login timeout", "pymssql uses the login_timeout keyword (not Connection Timeout)"],
+      ["Firewall block", "Allow Azure services + add dev IP to firewall rules"],
     ],
   },
 ];
@@ -166,11 +166,12 @@ export default function Dba({ onClose }) {
           ×
         </button>
 
-        <h2>DBA 가이드 — DB 구축 · 관리 · 운용</h2>
+        <h2>DBA Guide — Provisioning · Management · Operations</h2>
         <p className="about-lede">
-          azure-sql-ev의 데이터베이스를 DBA 관점에서 정리한 운영 가이드다.
-          무료 오퍼(serverless) 위에 스타 스키마를 구축하고, 최소 권한 계정과
-          auto-pause 대응까지 프로덕션 수준의 패턴을 담았다.
+          An operations guide to azure-sql-ev's database, written from a DBA
+          perspective. It builds a star schema on the free offer (serverless)
+          and covers production-grade patterns from least-privilege accounts to
+          auto-pause handling.
         </p>
 
         {SECTIONS.map((section) => (
