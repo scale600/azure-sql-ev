@@ -1,14 +1,33 @@
 import { useMemo, useState } from "react";
 
-function formatCell(value) {
+function isNumericColumn(rows, index) {
+  for (const row of rows) {
+    const v = row[index];
+    if (v !== null && v !== undefined && typeof v !== "number") return false;
+  }
+  return true;
+}
+
+function formatValue(value) {
   if (value === null || value === undefined) return "NULL";
-  if (typeof value === "boolean") return value ? "true" : "false";
+  if (typeof value === "number") return value.toLocaleString("en-US");
   return String(value);
+}
+
+function execTimeClass(ms) {
+  if (ms < 100) return "fast";
+  if (ms < 1000) return "mid";
+  return "slow";
 }
 
 export default function ResultTable({ result }) {
   const [sortCol, setSortCol] = useState(null);
   const [sortDir, setSortDir] = useState("asc");
+
+  const numericCols = useMemo(() => {
+    if (!result || !result.rows) return [];
+    return result.columns.map((_, i) => isNumericColumn(result.rows, i));
+  }, [result]);
 
   const rows = useMemo(() => {
     if (!result || !result.rows || sortCol === null) return result?.rows ?? [];
@@ -49,7 +68,9 @@ export default function ResultTable({ result }) {
     <div className="results">
       <div className="results-meta">
         <span>{result.rowCount} row(s)</span>
-        <span>{result.elapsedMs} ms</span>
+        <span className={`exec-time ${execTimeClass(result.elapsedMs)}`}>
+          {result.elapsedMs} ms
+        </span>
         {result.truncated && (
           <span className="truncated-banner">truncated to 1000 rows</span>
         )}
@@ -59,7 +80,11 @@ export default function ResultTable({ result }) {
           <thead>
             <tr>
               {result.columns.map((col, i) => (
-                <th key={i} onClick={() => toggleSort(i)}>
+                <th
+                  key={i}
+                  className={numericCols[i] ? "num" : ""}
+                  onClick={() => toggleSort(i)}
+                >
                   {col}
                   {sortCol === i && (sortDir === "asc" ? " ↑" : " ↓")}
                 </th>
@@ -70,8 +95,14 @@ export default function ResultTable({ result }) {
             {rows.map((row, ri) => (
               <tr key={ri}>
                 {row.map((cell, ci) => (
-                  <td key={ci} className={cell === null ? "null-cell" : ""}>
-                    {formatCell(cell)}
+                  <td
+                    key={ci}
+                    className={
+                      (numericCols[ci] ? "num " : "") +
+                      (cell === null ? "null-cell" : "")
+                    }
+                  >
+                    {formatValue(cell)}
                   </td>
                 ))}
               </tr>

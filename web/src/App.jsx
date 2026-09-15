@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { runQuery, getSchema } from "./api/client.js";
 import QueryEditor from "./components/QueryEditor.jsx";
 import ResultTable from "./components/ResultTable.jsx";
+import ResultChart, { isChartable } from "./components/ResultChart.jsx";
+import KpiCards from "./components/KpiCards.jsx";
 import SavedQueries from "./components/SavedQueries.jsx";
 import QueryHistory, { pushHistory } from "./components/QueryHistory.jsx";
 import About from "./components/About.jsx";
@@ -29,6 +31,14 @@ const SAMPLE_QUERIES = [
   },
 ];
 
+const KPI_QUERY = [
+  "SELECT",
+  "(SELECT COUNT(*) FROM fact_ev_registration) AS total_registrations,",
+  "(SELECT COUNT(*) FROM fact_ev_registration f JOIN dim_vehicle v ON f.vehicle_key = v.vehicle_key WHERE v.ev_type LIKE '%BEV%') AS bev_count,",
+  "(SELECT COUNT(*) FROM fact_ev_registration f JOIN dim_vehicle v ON f.vehicle_key = v.vehicle_key WHERE v.ev_type LIKE '%PHEV%') AS phev_count,",
+  "(SELECT ROUND(AVG(CAST(electric_range AS FLOAT)), 0) FROM fact_ev_registration WHERE electric_range IS NOT NULL) AS avg_range",
+].join(" ");
+
 export default function App() {
   const [query, setQuery] = useState(SAMPLE_QUERIES[0].query);
   const [result, setResult] = useState(null);
@@ -37,11 +47,16 @@ export default function App() {
   const [schema, setSchema] = useState([]);
   const [historyKey, setHistoryKey] = useState(0);
   const [showAbout, setShowAbout] = useState(false);
+  const [kpi, setKpi] = useState(null);
+  const [view, setView] = useState("table");
 
   useEffect(() => {
     getSchema()
       .then((data) => setSchema(data.tables || []))
       .catch(() => setSchema([]));
+    runQuery(KPI_QUERY)
+      .then((data) => setKpi(data))
+      .catch(() => setKpi(null));
   }, []);
 
   async function handleRun() {
@@ -51,6 +66,7 @@ export default function App() {
     try {
       const data = await runQuery(query);
       setResult(data);
+      setView("table");
       pushHistory(query.trim());
       setHistoryKey((k) => k + 1);
     } catch (e) {
@@ -75,6 +91,8 @@ export default function App() {
           About
         </button>
       </header>
+
+      {kpi && <KpiCards kpi={kpi} />}
 
       <div className="layout">
         <aside className="sidebar">
@@ -127,7 +145,31 @@ export default function App() {
             loading={loading}
           />
           {error && <div className="error-banner">{error}</div>}
-          {!error && <ResultTable result={result} />}
+          {!error && result && (
+            <>
+              <div className="view-toggle">
+                <button
+                  className={view === "table" ? "active" : ""}
+                  onClick={() => setView("table")}
+                >
+                  Table
+                </button>
+                <button
+                  className={view === "chart" ? "active" : ""}
+                  onClick={() => setView("chart")}
+                  disabled={!isChartable(result)}
+                >
+                  Chart
+                </button>
+              </div>
+              {view === "table" ? (
+                <ResultTable result={result} />
+              ) : (
+                <ResultChart result={result} />
+              )}
+            </>
+          )}
+          {!error && !result && <ResultTable result={null} />}
         </main>
       </div>
 
