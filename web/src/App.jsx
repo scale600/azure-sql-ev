@@ -21,6 +21,16 @@ const SAMPLE_QUERIES = [
       "SELECT v.ev_type, COUNT(*) AS count FROM fact_ev_registration f JOIN dim_vehicle v ON f.vehicle_key = v.vehicle_key GROUP BY v.ev_type;",
   },
   {
+    name: "Top 10 counties",
+    query:
+      "SELECT TOP 10 l.county, COUNT(*) AS registrations FROM fact_ev_registration f JOIN dim_location l ON f.location_key = l.location_key GROUP BY l.county ORDER BY registrations DESC;",
+  },
+  {
+    name: "Top 10 electric utilities",
+    query:
+      "SELECT TOP 10 u.electric_utility, COUNT(*) AS registrations FROM fact_ev_registration f JOIN dim_utility u ON f.utility_key = u.utility_key GROUP BY u.electric_utility ORDER BY registrations DESC;",
+  },
+  {
     name: "Registrations by county & year",
     query:
       "SELECT l.county, y.model_year, COUNT(*) AS registrations FROM fact_ev_registration f JOIN dim_location l ON f.location_key = l.location_key JOIN dim_model_year y ON f.model_year_key = y.model_year_key GROUP BY l.county, y.model_year ORDER BY l.county, y.model_year;",
