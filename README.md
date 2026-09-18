@@ -1,6 +1,10 @@
 # azure-sql-ev
 
-> An interactive **SQL query test dashboard** built on Azure SQL Database, Azure Functions, and Azure Static Web Apps — powered by real-world Washington State EV registration data.
+`azure-sql-ev.techcloudup.com` – **EV Registration SQL Playground**
+
+**Purpose**: Provide an interactive, read-only SQL query dashboard over Washington State electric-vehicle registration data — ingesting a public Socrata dataset into an Azure SQL star schema and exposing a browser-based SQL playground through a serverless API.
+
+**Core Tech**: Azure (SQL Database, Functions, Static Web Apps), React 18 + Vite, Python 3.11 (pymssql), Terraform (azurerm + azapi), GitHub Actions (OIDC).
 
 **Live**: https://azure-sql-ev.techcloudup.com
 **Repo**: https://github.com/scale600/azure-sql-ev
